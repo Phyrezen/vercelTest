@@ -1,14 +1,24 @@
-<script>
-  async function registrarVisita() {
-    await fetch('/api/registro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pantalla: `${window.screen.width}x${window.screen.height}`
-      })
-    });
-  }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Vercel Test</title>
+</head>
+<body>
+  <h1>Mi página web</h1>
 
-  // Ejecutar al cargar la página o al hacer login
-  window.onload = registrarVisita;
-</script>
+  <script>
+    async function registrarVisita() {
+      await fetch('/api/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pantalla: `${window.screen.width}x${window.screen.height}`
+        })
+      });
+    }
+
+    window.onload = registrarVisita;
+  </script>
+</body>
+</html>
