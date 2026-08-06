@@ -3,25 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vercel Test</title>
+  <title>Vercel Test - Historial</title>
+  <!-- Previene el error 404 del favicon -->
+  <link rel="icon" href="data:,">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
-    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 8px; word-break: break-word; }
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; color: #333; max-width: 600px; margin: auto; }
+    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-break: break-all; }
+    th { background-color: #0070f3; color: white; }
   </style>
 </head>
 <body>
-  <h1>Información de la Visita</h1>
+  <h1>Registro e Historial de Visitas</h1>
 
   <div class="card">
     <p><strong>Estado:</strong> <span id="estado">Cargando datos...</span></p>
-    <ul id="detalles" style="display: none;">
-      <li><strong>Hora de acceso:</strong> <span id="fecha"></span></li>
-      <li><strong>Tu IP:</strong> <span id="ip"></span></li>
-      <li><strong>Resolución:</strong> <span id="pantalla"></span></li>
-      <li><strong>User-Agent:</strong> <span id="navegador"></span></li>
-    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Últimas Visitas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha / Hora</th>
+          <th>IP</th>
+          <th>Pantalla</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-historial">
+        <tr><td colspan="3">Cargando historial...</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <script>
@@ -38,15 +51,26 @@
         const data = await response.json();
 
         if (response.ok && data.ok) {
-          document.getElementById('estado').innerText = '✅ Registro Exitoso';
-          document.getElementById('fecha').innerText = data.datos.fecha;
-          document.getElementById('ip').innerText = data.datos.ip;
-          document.getElementById('pantalla').innerText = data.datos.pantalla;
-          document.getElementById('navegador').innerText = data.datos.navegador;
+          document.getElementById('estado').innerText = '✅ Visita registrada con éxito';
           
-          document.getElementById('detalles').style.display = 'block';
+          const tbody = document.getElementById('tabla-historial');
+          tbody.innerHTML = '';
+
+          data.historial.forEach(item => {
+            // Se asegura de obtener el objeto
+            const registro = typeof item === 'string' ? JSON.parse(item) : item;
+            
+            if (registro && registro.fecha) {
+              const row = `<tr>
+                <td>${registro.fecha}</td>
+                <td>${registro.ip || 'N/A'}</td>
+                <td>${registro.pantalla || 'N/A'}</td>
+              </tr>`;
+              tbody.innerHTML += row;
+            }
+          });
         } else {
-          document.getElementById('estado').innerText = '❌ Error al obtener datos';
+          document.getElementById('estado').innerText = '❌ Error al guardar datos';
         }
       } catch (err) {
         console.error(err);
