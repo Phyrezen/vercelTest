@@ -3,36 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vercel Test - Historial</title>
-  <!-- Previene el error 404 del favicon -->
+  <title>Vercel Test - Historial Detallado</title>
   <link rel="icon" href="data:,">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; color: #333; max-width: 600px; margin: auto; }
-    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-break: break-all; }
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; background: #f0f2f5; color: #1c1e21; max-width: 900px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.82rem; }
+    th, td { border: 1px solid #e1e4e8; padding: 10px; text-align: left; word-break: break-word; }
     th { background-color: #0070f3; color: white; }
+    tr:nth-child(even) { background-color: #f8f9fa; }
+    .badge { background: #e7f5ff; color: #1971c2; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>Registro e Historial de Visitas</h1>
+  <h1>Registro de Visitas (Hora Argentina)</h1>
 
   <div class="card">
     <p><strong>Estado:</strong> <span id="estado">Cargando datos...</span></p>
   </div>
 
   <div class="card">
-    <h2>Últimas Visitas</h2>
+    <h2>Historial Reciente</h2>
     <table>
       <thead>
         <tr>
-          <th>Fecha / Hora</th>
+          <th>Fecha / Hora (ARG)</th>
+          <th>Ubicación</th>
           <th>IP</th>
           <th>Pantalla</th>
+          <th>Idioma</th>
+          <th>S.O. / Plataforma</th>
         </tr>
       </thead>
       <tbody id="tabla-historial">
-        <tr><td colspan="3">Cargando historial...</td></tr>
+        <tr><td colspan="6">Cargando historial...</td></tr>
       </tbody>
     </table>
   </div>
@@ -40,37 +44,42 @@
   <script>
     async function registrarVisita() {
       try {
+        // Recolectar información detallada del navegador del usuario
+        const datosNavegador = {
+          pantalla: `${window.screen.width}x${window.screen.height}`,
+          idioma: navigator.language || 'Desconocido',
+          plataforma: navigator.platform || 'Desconocida'
+        };
+
         const response = await fetch('/api/registro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            pantalla: `${window.screen.width}x${window.screen.height}`
-          })
+          body: JSON.stringify(datosNavegador)
         });
 
         const data = await response.json();
 
         if (response.ok && data.ok) {
-          document.getElementById('estado').innerText = '✅ Visita registrada con éxito';
+          document.getElementById('estado').innerText = '✅ Visita registrada correctamente';
           
           const tbody = document.getElementById('tabla-historial');
           tbody.innerHTML = '';
 
-          data.historial.forEach(item => {
-            // Se asegura de obtener el objeto
-            const registro = typeof item === 'string' ? JSON.parse(item) : item;
-            
+          data.historial.forEach(registro => {
             if (registro && registro.fecha) {
               const row = `<tr>
-                <td>${registro.fecha}</td>
+                <td><span class="badge">${registro.fecha}</span></td>
+                <td>${registro.ubicacion || 'N/A'}</td>
                 <td>${registro.ip || 'N/A'}</td>
                 <td>${registro.pantalla || 'N/A'}</td>
+                <td>${registro.idioma || 'N/A'}</td>
+                <td>${registro.plataforma || 'N/A'}</td>
               </tr>`;
               tbody.innerHTML += row;
             }
           });
         } else {
-          document.getElementById('estado').innerText = '❌ Error al guardar datos';
+          document.getElementById('estado').innerText = '❌ Error al registrar datos';
         }
       } catch (err) {
         console.error(err);
