@@ -1,7 +1,6 @@
 import Redis from 'ioredis';
 
 const connectionString = process.env.REDIS_URL || 'redis://default:oFcCtzW4uJpH1RfpHngI0rjRMgiRdJiS@navy-spontaneous-sunray-66431.db.redis.io:12221';
-
 const redis = new Redis(connectionString);
 
 export default async function handler(req, res) {
@@ -10,16 +9,32 @@ export default async function handler(req, res) {
       const userAgent = req.headers['user-agent'] || 'Desconocido';
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
+      // Geolocalización proporcionada automáticamente por Vercel
+      const pais = req.headers['x-vercel-ip-country'] || 'Desconocido';
+      const ciudad = req.headers['x-vercel-ip-city'] || 'Desconocida';
+      const region = req.headers['x-vercel-ip-country-region'] || '';
+
+      // Obtener la fecha exacta de Argentina
+      const fechaArg = new Date().toLocaleString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        dateStyle: 'short',
+        timeStyle: 'medium'
+      });
+
       const nuevaVisita = {
-        fecha: new Date().toLocaleString('es-AR'),
+        fecha: fechaArg,
         ip: ip,
-        pantalla: req.body?.pantalla || 'Desconocida'
+        ubicacion: ciudad && region ? `${ciudad}, ${region} (${pais})` : pais,
+        pantalla: req.body?.pantalla || 'Desconocida',
+        idioma: req.body?.idioma || 'Desconocido',
+        plataforma: req.body?.plataforma || 'Desconocida',
+        navegador: userAgent
       };
 
       // Guardar en Redis
       await redis.lpush('visitas_historial', JSON.stringify(nuevaVisita));
 
-      // Leer historial
+      // Obtener el historial de las últimas 50 visitas
       const rawHistorial = await redis.lrange('visitas_historial', 0, 49);
       const historial = rawHistorial.map(item => {
         try {
