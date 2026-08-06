@@ -2,20 +2,56 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vercel Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 8px; word-break: break-word; }
+  </style>
 </head>
 <body>
-  <h1>test567123</h1>
+  <h1>Información de la Visita</h1>
+
+  <div class="card">
+    <p><strong>Estado:</strong> <span id="estado">Cargando datos...</span></p>
+    <ul id="detalles" style="display: none;">
+      <li><strong>Hora de acceso:</strong> <span id="fecha"></span></li>
+      <li><strong>Tu IP:</strong> <span id="ip"></span></li>
+      <li><strong>Resolución:</strong> <span id="pantalla"></span></li>
+      <li><strong>User-Agent:</strong> <span id="navegador"></span></li>
+    </ul>
+  </div>
 
   <script>
     async function registrarVisita() {
-      await fetch('/api/registro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pantalla: `${window.screen.width}x${window.screen.height}`
-        })
-      });
+      try {
+        const response = await fetch('/api/registro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pantalla: `${window.screen.width}x${window.screen.height}`
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.ok) {
+          document.getElementById('estado').innerText = '✅ Registro Exitoso';
+          document.getElementById('fecha').innerText = data.datos.fecha;
+          document.getElementById('ip').innerText = data.datos.ip;
+          document.getElementById('pantalla').innerText = data.datos.pantalla;
+          document.getElementById('navegador').innerText = data.datos.navegador;
+          
+          document.getElementById('detalles').style.display = 'block';
+        } else {
+          document.getElementById('estado').innerText = '❌ Error al obtener datos';
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('estado').innerText = '❌ Error de conexión';
+      }
     }
 
     window.onload = registrarVisita;
