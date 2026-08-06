@@ -60,7 +60,7 @@
         const data = await response.json();
 
         if (response.ok && data.ok) {
-          document.getElementById('estado').innerText = '✅ Visita registrada correctamente';
+          document.getElementById('estado').innerText = 'Datos del usuario registrados correctamente';
           
           const tbody = document.getElementById('tabla-historial');
           tbody.innerHTML = '';
